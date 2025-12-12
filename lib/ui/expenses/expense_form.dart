@@ -9,31 +9,33 @@ class ExpenseForm extends StatefulWidget {
 }
 
 class _ExpenseFormState extends State<ExpenseForm> {
- 
   TextEditingController titleController = TextEditingController();
- 
- @override
- void dispose() {
+  TextEditingController amountController = TextEditingController();  
+
+  @override
+  void dispose() {
     titleController.dispose();
+    amountController.dispose();  
     super.dispose();
-   
   }
 
   void onCreate() {
-     
-    //  1 Build an expense
-    String  title = titleController.text;
-    double amount = 0;             // for now..
-    Category category =Category.food;   // for now..
+    String title = titleController.text;
+    double amount = double.tryParse(amountController.text) ?? 0;  
+    Category category = Category.food;
     DateTime date = DateTime.now();
 
-    Expense newExpense = Expense(title: title, amount: amount, date: date, category: category);
-    Navigator.pop(context);
+    Expense newExpense = Expense(
+      title: title,
+      amount: amount,
+      date: date,
+      category: category,
+    );
+    
+    Navigator.pop(context, newExpense);  
   }
 
   void onCancel() {
-   
-    // Close the modal
     Navigator.pop(context);
   }
 
@@ -46,30 +48,30 @@ class _ExpenseFormState extends State<ExpenseForm> {
         children: [
           TextField(
             controller: titleController,
-            onChanged: (value) {
-              setState(() {});
-            },
             decoration: InputDecoration(label: Text("Title")),
             maxLength: 50,
           ),
-           Text("Value is ${titleController.text}"),
-          ElevatedButton(onPressed: () => showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text('Alert  Dialog Title'),
-          content: const Text('AlertDialog description'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'Cancel'),
-              child: const Text('Cancel'),
-            ),
-            TextButton(onPressed: () => Navigator.pop(context, 'OK'), child: const Text('OK')),
-          ],
-        ),
-      ),
-          child: Text("Create")),
-          const SizedBox(height: 10),
-          ElevatedButton(onPressed: onCreate, child: Text("Cancel")),
+          TextField(  
+            controller: amountController,
+            decoration: InputDecoration(label: Text("Amount")),
+            maxLength: 50,
+            keyboardType: TextInputType.number,
+          ),
+          
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                onPressed: onCancel,  
+                child: Text("Cancel"),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: onCreate,
+                child: Text("Create"),
+              ),
+            ],
+          ),
         ],
       ),
     );

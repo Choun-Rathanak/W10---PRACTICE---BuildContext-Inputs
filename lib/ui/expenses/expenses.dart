@@ -1,38 +1,27 @@
 import 'package:flutter/material.dart';
-import'../../models/expense.dart'; 
+import '../../models/expense.dart';
 
-class ExpensesView extends StatefulWidget {
-  const ExpensesView({super.key});
-
-  @override
-  State<ExpensesView> createState() {
-    return _ExpensesViewState();
-  }
-}
-
-class _ExpensesViewState extends State<ExpensesView> {
-  final List<Expense> _expenses = [
-    Expense(
-      title: 'Flutter Course',
-      amount: 19.99,
-      date: DateTime.now(),
-      category: Category.work,
-    ),
-    Expense(
-      title: 'Cinema',
-      amount: 15.69,
-      date: DateTime.now(),
-      category: Category.leisure,
-    ),
-  ];
-
-
+class ExpensesView extends StatelessWidget {
+  const ExpensesView({
+    super.key,
+    required this.expenses,
+    required this.onExpenseRemoved, 
+  });
   
+  final List<Expense> expenses;
+  final Function(int) onExpenseRemoved;  
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: _expenses.length,
-      itemBuilder: (context, index) => ExpenseItem(expense: _expenses[index]),
+      itemCount: expenses.length,
+      itemBuilder: (context, index) => Dismissible(  
+        key: Key(expenses[index].id),  
+        onDismissed: (direction) { 
+          onExpenseRemoved(index);  
+        },
+        child: ExpenseItem(expense: expenses[index]),
+      ),
     );
   }
 }
@@ -79,10 +68,13 @@ class ExpenseItem extends StatelessWidget {
                 ],
               ),
               Spacer(),
-              Row(children: [Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Icon(expenseIcon),
-              ), Text(expenseDate)]),
+              Row(children: [
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Icon(expenseIcon),
+                ),
+                Text(expenseDate)
+              ]),
             ],
           ),
         ),
