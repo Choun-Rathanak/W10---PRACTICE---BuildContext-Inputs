@@ -9,30 +9,53 @@ class ExpenseForm extends StatefulWidget {
 }
 
 class _ExpenseFormState extends State<ExpenseForm> {
-  TextEditingController titleController = TextEditingController();
-  TextEditingController amountController = TextEditingController();  
+  final _titleController = TextEditingController();
+  final _amountController = TextEditingController();
+  Category _selectedCategory = Category.leisure;
+  DateTime? _selectedDate; 
 
   @override
   void dispose() {
-    titleController.dispose();
-    amountController.dispose();  
+    _titleController.dispose();
+    _amountController.dispose();
     super.dispose();
   }
 
-  void onCreate() {
-    String title = titleController.text;
-    double amount = double.tryParse(amountController.text) ?? 0;  
-    Category category = Category.food;
-    DateTime date = DateTime.now();
+  Future<void> _presentDatePicker() async {
+    final now = DateTime.now();
+    final firstDate = DateTime(now.year - 1, now.month, now.day);
+    final lastDate = now;
 
-    Expense newExpense = Expense(
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: firstDate,
+      lastDate: lastDate,
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    }
+  }
+
+  void onCreate() {
+    final title = _titleController.text;
+    final amount = double.tryParse(_amountController.text);
+
+    if (title.isEmpty || amount == null || amount <= 0 || _selectedDate == null) {
+      return;
+    }
+
+    final expense = Expense(
       title: title,
       amount: amount,
-      date: date,
-      category: category,
+      date: _selectedDate!,
+      category: _selectedCategory,
     );
-    
-    Navigator.pop(context, newExpense);  
+
+    Navigator.pop(context, expense);
   }
 
   void onCancel() {
@@ -47,22 +70,62 @@ class _ExpenseFormState extends State<ExpenseForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TextField(
-            controller: titleController,
+            controller: _titleController,
             decoration: InputDecoration(label: Text("Title")),
             maxLength: 50,
           ),
-          TextField(  
-            controller: amountController,
-            decoration: InputDecoration(label: Text("Amount")),
-            maxLength: 50,
-            keyboardType: TextInputType.number,
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Amount',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      _selectedDate == null
+                          ? 'No date selected'
+                          : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                    ),
+                    IconButton(
+                      onPressed: _presentDatePicker,
+                      icon: const Icon(Icons.calendar_month),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              DropdownButton<Category>(
+                value: _selectedCategory,
+                items: Category.values.map((category) {
+                  return DropdownMenuItem<Category>(
+                    value: category,
+                    child: Text(category.name.toUpperCase()),
+                  );
+                }).toList(),
+                onChanged: (Category? newCategory) {
+                  if (newCategory != null) {
+                    setState(() {
+                      _selectedCategory = newCategory;
+                    });
+                  }
+                },
+              ),
               ElevatedButton(
-                onPressed: onCancel,  
+                onPressed: onCancel,
                 child: Text("Cancel"),
               ),
               const SizedBox(width: 10),

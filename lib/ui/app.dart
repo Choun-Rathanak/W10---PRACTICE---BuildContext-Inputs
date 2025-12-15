@@ -42,15 +42,50 @@ class _AppState extends State<App> {
     }
   }
 
-
   void onExpenseRemoved(int index) {
+    final removedExpense = _expenses[index]; 
+    
     setState(() {
-      _expenses.removeAt(index); 
+      _expenses.removeAt(index);
     });
+
+    
+    ScaffoldMessenger.of(context).clearSnackBars();
+
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Expense deleted.'),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () {
+            setState(() {
+              _expenses.insert(index, removedExpense); 
+            });
+          },
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+   
+    Widget mainContent = const Center(
+      child: Text(
+        'No expenses found. Start adding some!',
+        style: TextStyle(fontSize: 16),
+      ),
+    );
+
+    if (_expenses.isNotEmpty) {
+      mainContent = ExpensesView(
+        expenses: _expenses,
+        onExpenseRemoved: onExpenseRemoved,
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.blue[100],
       appBar: AppBar(
@@ -63,10 +98,7 @@ class _AppState extends State<App> {
         backgroundColor: Colors.blue[700],
         title: const Text('Ronan-The-Best Expenses App'),
       ),
-      body: ExpensesView(
-        expenses: _expenses,
-        onExpenseRemoved: onExpenseRemoved,  
-      ),
+      body: mainContent,
     );
   }
 }
