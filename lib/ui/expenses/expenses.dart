@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/expense.dart';
+import 'package:intl/intl.dart';
 
 class ExpensesView extends StatelessWidget {
   const ExpensesView({
@@ -45,7 +46,7 @@ class ExpenseItem extends StatelessWidget {
   }
 
   String get expenseDate {
-    return "11/54/25";
+     return DateFormat('dd/MM/yyyy').format(expense.date);
   }
 
   @override
