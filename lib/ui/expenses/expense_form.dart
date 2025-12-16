@@ -45,7 +45,24 @@ class _ExpenseFormState extends State<ExpenseForm> {
     final amount = double.tryParse(_amountController.text);
 
     if (title.isEmpty || amount == null || amount <= 0 || _selectedDate == null) {
-      return;
+      showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Invalid Input'),
+        content: const Text(
+          'Please make sure a valid title, amount, date, and category were entered.',
+        ),
+        actions: [
+         TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+            },
+              child: const Text('Okay'),
+          ),
+        ],
+      ),
+    );
+    return;
     }
 
     final expense = Expense(
